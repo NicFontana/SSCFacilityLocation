@@ -32,6 +32,10 @@ public class Solution {
         return closedFacilities;
     }
 
+    public HashMap<Integer, Facility> getOpenedFacilities() {
+        return openedFacilities;
+    }
+
     public void performCustomersTransfer(CustomersTransfer customersTransfer) {
 
         Facility fromFacility = customersTransfer.getFromFacility();

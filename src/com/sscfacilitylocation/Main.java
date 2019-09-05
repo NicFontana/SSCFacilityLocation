@@ -19,6 +19,7 @@ public class Main {
 
         if (solution != null) {
             Console.println(solution);
+            problem.performLocalSearch();
         } else {
             Console.println("Problem is unsatisfiable.");
         }

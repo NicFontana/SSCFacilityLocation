@@ -1,6 +1,10 @@
 package com.sscfacilitylocation.common;
 
 import com.sscfacilitylocation.algorithms.GreedyStrategy;
+import com.sscfacilitylocation.algorithms.graph.ImprovementGraph;
+import com.sscfacilitylocation.algorithms.graph.Node;
+import com.sscfacilitylocation.algorithms.graph.NodeType;
+import com.sscfacilitylocation.algorithms.graph.Pair;
 import com.sscfacilitylocation.entity.Customer;
 import com.sscfacilitylocation.entity.Facility;
 import com.sscfacilitylocation.utility.Console;
@@ -8,9 +12,8 @@ import com.sscfacilitylocation.utility.Console;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.PriorityQueue;
-import java.util.StringTokenizer;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Problem {
 
@@ -126,6 +129,12 @@ public class Problem {
         if (!toBeAssignedCustomers.isEmpty()) {
             solution = null;
         }
+    }
+
+    public void performLocalSearch() {
+        ImprovementGraph improvementGraph = new ImprovementGraph(solution);
+
+        Console.println(improvementGraph);
     }
 
     @Override

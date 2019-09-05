@@ -74,6 +74,25 @@ public class Facility implements Cloneable {
         return fixedCost + customerCosts.values().stream().reduce(0.0F, Float::sum);
     }
 
+    public Customer getWorstCustomer() {
+        Customer worstCustomer = null;
+        float worstCost = -1;
+
+        for (Customer c : servedCustomers) {
+            float customerCost = customerCosts.get(c.getId());
+
+            if (customerCost > worstCost) {
+                worstCost = customerCost;
+                worstCustomer = c;
+            }
+            else if (customerCost == worstCost && c.getDemand() < worstCustomer.getDemand()) {
+                worstCustomer = c;
+            }
+        }
+
+        return worstCustomer;
+    }
+
     public String toString() {
         return String.valueOf(id);
     }
