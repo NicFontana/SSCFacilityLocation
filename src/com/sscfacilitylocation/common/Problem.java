@@ -132,9 +132,13 @@ public class Problem {
     }
 
     public void performLocalSearch() {
+
         ImprovementGraph improvementGraph = new ImprovementGraph(solution);
 
         Console.println(improvementGraph);
+
+        List<Node> cycle = improvementGraph.getBestExchangeCycle();
+
     }
 
     @Override

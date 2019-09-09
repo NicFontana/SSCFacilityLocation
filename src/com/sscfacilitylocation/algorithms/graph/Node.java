@@ -67,8 +67,16 @@ public class Node {
         return distanceFromSource;
     }
 
+    public void setDistanceFromSource(float distanceFromSource) {
+        this.distanceFromSource = distanceFromSource;
+    }
+
     Node getPredecessor() {
         return predecessor;
+    }
+
+    public void setPredecessor(Node predecessor) {
+        this.predecessor = predecessor;
     }
 
     NodeType getType() {
@@ -86,5 +94,10 @@ public class Node {
     @Override
     public int hashCode() {
         return Objects.hash(name);
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }
