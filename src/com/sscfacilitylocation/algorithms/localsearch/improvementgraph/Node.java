@@ -1,4 +1,4 @@
-package com.sscfacilitylocation.algorithms.graph;
+package com.sscfacilitylocation.algorithms.localsearch.improvementgraph;
 
 import com.sscfacilitylocation.entity.Customer;
 import com.sscfacilitylocation.entity.Facility;

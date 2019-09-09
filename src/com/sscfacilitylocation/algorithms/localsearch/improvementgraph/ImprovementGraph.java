@@ -1,4 +1,4 @@
-package com.sscfacilitylocation.algorithms.graph;
+package com.sscfacilitylocation.algorithms.localsearch.improvementgraph;
 
 import com.sscfacilitylocation.common.Solution;
 import com.sscfacilitylocation.entity.Customer;
@@ -41,7 +41,7 @@ public class ImprovementGraph {
 
     }
 
-    public void addSourceNode() {
+    private void addSourceNode() {
         sourceNode = new Node();
         nodes.putIfAbsent(sourceNode, new HashMap<>());
     }
@@ -50,7 +50,7 @@ public class ImprovementGraph {
         nodes.putIfAbsent(new Node(facility, type), new HashMap<>());
     }
 
-    public void addEdge(Node n1, Node n2, float value) {
+    private void addEdge(Node n1, Node n2, float value) {
         nodes.get(n1).putIfAbsent(n2, value);
     }
 
@@ -215,23 +215,22 @@ public class ImprovementGraph {
 
     private boolean isSubsetDisjointPathUntil(Node lastNode) {
         Set<Facility> visitedFacilities = new HashSet<>();
-        visitedFacilities.add(lastNode.getFacility());
-
         System.out.print("Is a subset disjoint cycle? " + lastNode + " <- ");
-        return testDisjoint(lastNode, visitedFacilities);
+
+        return testDisjointness(lastNode, visitedFacilities);
     }
 
     private boolean willBeSubsetDisjointPath(Node lastNode, Node newNode) {
         Set<Facility> visitedFacilities = new HashSet<>();
-        visitedFacilities.add(lastNode.getFacility());
-
         System.out.print("Will be a subset disjoint cycle? " + newNode + " <- " + lastNode + " <- ");
 
-        return testDisjoint(lastNode, visitedFacilities) && !visitedFacilities.contains(newNode.getFacility());
+        return testDisjointness(lastNode, visitedFacilities) && !visitedFacilities.contains(newNode.getFacility());
     }
 
-    private boolean testDisjoint(Node lastNode, Set<Facility> visitedFacilities) {
+    private boolean testDisjointness(Node lastNode, Set<Facility> visitedFacilities) {
+        visitedFacilities.add(lastNode.getFacility());
         Node next = lastNode.getPredecessor();
+
         while (next != null) {
             System.out.print(next + " <- ");
             Facility f = next.getFacility();

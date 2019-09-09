@@ -1,4 +1,4 @@
-package com.sscfacilitylocation.common;
+package com.sscfacilitylocation.algorithms.localsearch;
 
 import com.sscfacilitylocation.entity.Customer;
 import com.sscfacilitylocation.entity.Facility;
@@ -18,6 +18,13 @@ public class CustomersTransfer {
         this.toFacility = toFacility;
     }
 
+    public CustomersTransfer(Customer movingCustomer, Facility fromFacility, Facility toFacility) {
+        movingCustomers = new HashSet<>();
+        movingCustomers.add(movingCustomer);
+        this.fromFacility = fromFacility;
+        this.toFacility = toFacility;
+    }
+
     public HashSet<Customer> getMovingCustomers() {
         return movingCustomers;
     }
@@ -30,20 +37,4 @@ public class CustomersTransfer {
         return toFacility;
     }
 
-    public float getSaving() {
-        if (fromFacility != null) {
-            float saving = fromFacility.getFixedCost() - toFacility.getFixedCost();
-
-            for (Customer customer : movingCustomers) {
-                int customerId = customer.getId();
-                saving += fromFacility.getCustomerCosts().get(customerId) - toFacility.getCustomerCosts().get(customerId);
-            }
-            return saving;
-        }
-        return 0;
-    }
-
-    public boolean isBetterThan(CustomersTransfer comparedSolution) {
-        return getSaving() > comparedSolution.getSaving();
-    }
 }

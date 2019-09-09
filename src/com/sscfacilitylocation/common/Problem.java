@@ -1,8 +1,8 @@
 package com.sscfacilitylocation.common;
 
-import com.sscfacilitylocation.algorithms.GreedyStrategy;
-import com.sscfacilitylocation.algorithms.graph.ImprovementGraph;
-import com.sscfacilitylocation.algorithms.graph.Node;
+import com.sscfacilitylocation.algorithms.greedy.GreedyStrategy;
+import com.sscfacilitylocation.algorithms.localsearch.LocalSearchStrategy;
+import com.sscfacilitylocation.algorithms.localsearch.SolutionImprovement;
 import com.sscfacilitylocation.entity.Customer;
 import com.sscfacilitylocation.entity.Facility;
 import com.sscfacilitylocation.utility.Console;
@@ -21,10 +21,12 @@ public class Problem {
     private float[] customerDemands;
     private float[][] facilityToCustomerCosts;
     private GreedyStrategy greedyStrategy;
+    private LocalSearchStrategy localSearchStrategy;
     private Solution solution;
 
-    public Problem(String instancePath, GreedyStrategy greedyStrategy) {
+    public Problem(String instancePath, GreedyStrategy greedyStrategy, LocalSearchStrategy localSearchStrategy) {
         this.greedyStrategy = greedyStrategy;
+        this.localSearchStrategy = localSearchStrategy;
 
         try {
             BufferedReader inFile = new BufferedReader(new FileReader(instancePath));
@@ -128,26 +130,26 @@ public class Problem {
         }
     }
 
-    public void performLocalSearch() {
+    public void performLocalSearch() throws RuntimeException {
+
+        if (solution == null) {
+            throw new RuntimeException("Cannot perform a Local Search without an initial solution");
+        }
 
         int k = 1;
         Console.println("\nITERATION " + k);
-        ImprovementGraph improvementGraph = new ImprovementGraph(solution);
-        List<Node> cycle = improvementGraph.getBestExchangeCycle();
+        SolutionImprovement solutionImprovement = localSearchStrategy.getSolutionImprovement(solution);
 
-        while (cycle != null) {
-            solution.applyExchangeCycle(cycle);
+        while (solutionImprovement != null) {
+            solution.applyImprovement(solutionImprovement);
             Console.println("");
             Console.println(solution);
-
             k += 1;
             Console.println("\nITERATION " + k);
-            improvementGraph = new ImprovementGraph(solution);
-            Console.println(improvementGraph);
-            cycle = improvementGraph.getBestExchangeCycle();
+            solutionImprovement = localSearchStrategy.getSolutionImprovement(solution);
         }
 
-        Console.println("\nNo more improving exchange feasible.");
+        Console.println("\nNo more improvement feasible.");
 
     }
 

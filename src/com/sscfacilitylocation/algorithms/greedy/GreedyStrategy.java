@@ -1,4 +1,4 @@
-package com.sscfacilitylocation.algorithms;
+package com.sscfacilitylocation.algorithms.greedy;
 
 import com.sscfacilitylocation.entity.Customer;
 import com.sscfacilitylocation.entity.Facility;

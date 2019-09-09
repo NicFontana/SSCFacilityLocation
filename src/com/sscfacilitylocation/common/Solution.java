@@ -1,15 +1,12 @@
 package com.sscfacilitylocation.common;
 
-import com.sscfacilitylocation.algorithms.graph.Node;
-import com.sscfacilitylocation.algorithms.graph.NodeType;
+import com.sscfacilitylocation.algorithms.localsearch.CustomersTransfer;
+import com.sscfacilitylocation.algorithms.localsearch.SolutionImprovement;
 import com.sscfacilitylocation.entity.Customer;
 import com.sscfacilitylocation.entity.Facility;
 import com.sscfacilitylocation.utility.Console;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class Solution {
 
@@ -40,34 +37,6 @@ public class Solution {
         return openedFacilities;
     }
 
-    public void performCustomersTransfer(CustomersTransfer customersTransfer) {
-
-        Facility fromFacility = customersTransfer.getFromFacility();
-        Facility toFacility = customersTransfer.getToFacility();
-        HashSet<Customer> movingCustomers = customersTransfer.getMovingCustomers();
-
-        if (fromFacility != null) {
-            // Just transfer customers between opened facilities
-            openedFacilities.get(toFacility.getId())
-                    .addCustomers(movingCustomers);
-            openedFacilities.get(fromFacility.getId())
-                    .removeCustomers(movingCustomers);
-
-            if (fromFacility.getServedCustomers().isEmpty()) {
-                openedFacilities.remove(fromFacility.getId());
-                closedFacilities.put(fromFacility.getId(), fromFacility);
-            }
-        } else {
-            System.out.println("Aggiungo clienti " + Arrays.toString(movingCustomers.toArray()) + " alla facility " + toFacility.getId());
-            if (toFacility.getServedCustomers().isEmpty()) {
-                openedFacilities.put(toFacility.getId(), toFacility);
-                closedFacilities.remove(toFacility.getId());
-            }
-            openedFacilities.get(toFacility.getId())
-                    .addCustomers(movingCustomers);
-        }
-    }
-
     public void openFacility(Facility facility) {
         closedFacilities.remove(facility.getId());
         openedFacilities.put(facility.getId(), facility);
@@ -94,6 +63,22 @@ public class Solution {
         }
     }
 
+    public void addCustomersToFacility(Set<Customer> customers, Facility facility) {
+        if (openedFacilities.containsKey(facility.getId())) {
+            facility.addCustomers(customers);
+        } else {
+            openFacility(facility);
+            facility.addCustomers(customers);
+        }
+    }
+
+    public void removeCustomersFromFacility(Set<Customer> customers, Facility facility) {
+        openedFacilities.get(facility.getId()).removeCustomers(customers);
+        if (facility.getServedCustomers().isEmpty()) {
+            closeFacility(facility);
+        }
+    }
+
     public float getCost() {
         float cost = 0;
 
@@ -107,22 +92,11 @@ public class Solution {
         return cost;
     }
 
-    public void applyExchangeCycle(List<Node> cycle) {
-        for (int i = 0; i < cycle.size(); i++) {
-            for (int h = i + 1; h < cycle.size(); h++) {
-                Node losingFacilityNode = cycle.get(h);
-                if (losingFacilityNode.getType() != NodeType.SOURCE) { // Source node doesn't lose any customer
-                    Facility losingFacility = losingFacilityNode.getFacility();
-                    Customer leavingCustomer = losingFacilityNode.getLeavingCustomer();
-
-                    Facility incomeFacility = cycle.get(i).getFacility();
-
-                    Console.println("\t- Moving customer " + leavingCustomer + " from facility " + losingFacility + " to facility " + incomeFacility);
-                    addCustomerToFacility(leavingCustomer, incomeFacility);
-                    removeCustomerFromFacility(leavingCustomer, losingFacility);
-                    break;
-                }
-            }
+    public void applyImprovement(SolutionImprovement solutionImprovement) {
+        for (CustomersTransfer transfer : solutionImprovement.getCustomersTransferList()) {
+            Console.println("\t- Moving customers " + transfer.getMovingCustomers() + " from facility " + transfer.getFromFacility() + " to facility " + transfer.getToFacility());
+            addCustomersToFacility(transfer.getMovingCustomers(), transfer.getToFacility());
+            removeCustomersFromFacility(transfer.getMovingCustomers(), transfer.getFromFacility());
         }
     }
 
