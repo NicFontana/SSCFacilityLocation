@@ -1,11 +1,15 @@
 package com.sscfacilitylocation.common;
 
+import com.sscfacilitylocation.algorithms.graph.Node;
+import com.sscfacilitylocation.algorithms.graph.NodeType;
 import com.sscfacilitylocation.entity.Customer;
 import com.sscfacilitylocation.entity.Facility;
+import com.sscfacilitylocation.utility.Console;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 public class Solution {
 
@@ -75,11 +79,19 @@ public class Solution {
     }
 
     public void addCustomerToFacility(Customer customer, Facility facility) {
-        openedFacilities.get(facility.getId()).addCustomer(customer);
+        if (openedFacilities.containsKey(facility.getId())) {
+            facility.addCustomer(customer);
+        } else {
+            openFacility(facility);
+            facility.addCustomer(customer);
+        }
     }
 
     public void removeCustomerFromFacility(Customer customer, Facility facility) {
         openedFacilities.get(facility.getId()).removeCustomer(customer);
+        if (facility.getServedCustomers().isEmpty()) {
+            closeFacility(facility);
+        }
     }
 
     public float getCost() {
@@ -93,6 +105,25 @@ public class Solution {
             }
         }
         return cost;
+    }
+
+    public void applyExchangeCycle(List<Node> cycle) {
+        for (int i = 0; i < cycle.size(); i++) {
+            for (int h = i + 1; h < cycle.size(); h++) {
+                Node losingFacilityNode = cycle.get(h);
+                if (losingFacilityNode.getType() != NodeType.SOURCE) { // Source node doesn't lose any customer
+                    Facility losingFacility = losingFacilityNode.getFacility();
+                    Customer leavingCustomer = losingFacilityNode.getLeavingCustomer();
+
+                    Facility incomeFacility = cycle.get(i).getFacility();
+
+                    Console.println("\t- Moving customer " + leavingCustomer + " from facility " + losingFacility + " to facility " + incomeFacility);
+                    addCustomerToFacility(leavingCustomer, incomeFacility);
+                    removeCustomerFromFacility(leavingCustomer, losingFacility);
+                    break;
+                }
+            }
+        }
     }
 
     @Override

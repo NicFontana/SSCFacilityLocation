@@ -3,8 +3,6 @@ package com.sscfacilitylocation.common;
 import com.sscfacilitylocation.algorithms.GreedyStrategy;
 import com.sscfacilitylocation.algorithms.graph.ImprovementGraph;
 import com.sscfacilitylocation.algorithms.graph.Node;
-import com.sscfacilitylocation.algorithms.graph.NodeType;
-import com.sscfacilitylocation.algorithms.graph.Pair;
 import com.sscfacilitylocation.entity.Customer;
 import com.sscfacilitylocation.entity.Facility;
 import com.sscfacilitylocation.utility.Console;
@@ -13,7 +11,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Problem {
 
@@ -133,11 +130,24 @@ public class Problem {
 
     public void performLocalSearch() {
 
+        int k = 1;
+        Console.println("\nITERATION " + k);
         ImprovementGraph improvementGraph = new ImprovementGraph(solution);
-
-        Console.println(improvementGraph);
-
         List<Node> cycle = improvementGraph.getBestExchangeCycle();
+
+        while (cycle != null) {
+            solution.applyExchangeCycle(cycle);
+            Console.println("");
+            Console.println(solution);
+
+            k += 1;
+            Console.println("\nITERATION " + k);
+            improvementGraph = new ImprovementGraph(solution);
+            Console.println(improvementGraph);
+            cycle = improvementGraph.getBestExchangeCycle();
+        }
+
+        Console.println("\nNo more improving exchange feasible.");
 
     }
 

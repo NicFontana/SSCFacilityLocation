@@ -55,11 +55,11 @@ public class Node {
         return name;
     }
 
-    Facility getFacility() {
+    public Facility getFacility() {
         return facility;
     }
 
-    Customer getLeavingCustomer() {
+    public Customer getLeavingCustomer() {
         return leavingCustomer;
     }
 
@@ -71,7 +71,7 @@ public class Node {
         this.distanceFromSource = distanceFromSource;
     }
 
-    Node getPredecessor() {
+    public Node getPredecessor() {
         return predecessor;
     }
 
@@ -79,7 +79,7 @@ public class Node {
         this.predecessor = predecessor;
     }
 
-    NodeType getType() {
+    public NodeType getType() {
         return type;
     }
 
