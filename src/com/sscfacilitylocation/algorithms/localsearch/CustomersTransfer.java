@@ -5,10 +5,11 @@ import com.sscfacilitylocation.entity.Facility;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 public class CustomersTransfer {
 
-    private HashSet<Customer> movingCustomers;
+    private Set<Customer> movingCustomers;
     private Facility fromFacility;
     private Facility toFacility;
 
@@ -25,7 +26,7 @@ public class CustomersTransfer {
         this.toFacility = toFacility;
     }
 
-    public HashSet<Customer> getMovingCustomers() {
+    public Set<Customer> getMovingCustomers() {
         return movingCustomers;
     }
 

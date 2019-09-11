@@ -3,6 +3,7 @@ package com.sscfacilitylocation.common;
 import com.sscfacilitylocation.algorithms.greedy.GreedyStrategy;
 import com.sscfacilitylocation.algorithms.localsearch.LocalSearchStrategy;
 import com.sscfacilitylocation.algorithms.localsearch.SolutionImprovement;
+import com.sscfacilitylocation.algorithms.metaheuristic.CustomerTabuSearch;
 import com.sscfacilitylocation.entity.Customer;
 import com.sscfacilitylocation.entity.Facility;
 import com.sscfacilitylocation.utility.Console;
@@ -151,6 +152,16 @@ public class Problem {
 
         Console.println("\nNo more improvement feasible.");
 
+    }
+
+    public void performTabuSearch(CustomerTabuSearch tabuSearch) throws RuntimeException {
+        if (solution == null) {
+            throw new RuntimeException("Cannot perform a Local Search without an initial solution");
+        }
+
+        solution = tabuSearch.run();
+
+        Console.println("Best solution is \n" + solution);
     }
 
     @Override

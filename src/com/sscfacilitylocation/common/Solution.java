@@ -8,7 +8,7 @@ import com.sscfacilitylocation.utility.Console;
 
 import java.util.*;
 
-public class Solution {
+public class Solution implements Cloneable {
 
     private HashMap<Integer, Facility> openedFacilities;
     private HashMap<Integer, Facility> closedFacilities;
@@ -97,6 +97,26 @@ public class Solution {
             Console.println("\t- Moving customers " + transfer.getMovingCustomers() + " from facility " + transfer.getFromFacility() + " to facility " + transfer.getToFacility());
             addCustomersToFacility(transfer.getMovingCustomers(), transfer.getToFacility());
             removeCustomersFromFacility(transfer.getMovingCustomers(), transfer.getFromFacility());
+        }
+    }
+
+    @Override
+    public Object clone() {
+        try {
+            Solution solution = (Solution) super.clone();
+            solution.closedFacilities = new HashMap<>();
+            this.closedFacilities.forEach((id, facility) -> {
+                solution.closedFacilities.put(id, (Facility) facility.clone());
+            });
+            solution.openedFacilities = new HashMap<>();
+            this.openedFacilities.forEach((id, facility) -> {
+                solution.openedFacilities.put(id, (Facility) facility.clone());
+            });
+
+            return solution;
+        } catch (CloneNotSupportedException ex) {
+            Console.println(ex.getMessage());
+            throw new InternalError(ex);
         }
     }
 

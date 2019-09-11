@@ -41,6 +41,31 @@ public class ImprovementGraph {
 
     }
 
+    public ImprovementGraph(Solution solution, Queue<Customer> tabuList) {
+        nodes = new HashMap<>();
+
+        addSourceNode();
+
+        for (Facility f : solution.getOpenedFacilities().values()) {
+            addNode(f, NodeType.REGULAR, tabuList);
+            addNode(f, NodeType.DUMMY, tabuList);
+        }
+        for (Facility f : solution.getClosedFacilities().values()) {
+            addNode(f, NodeType.DUMMY, tabuList);
+        }
+
+        regularNodes = nodes.keySet().stream()
+                .filter(node -> node.getType() == NodeType.REGULAR).collect(Collectors.toList());
+        dummyNodes = nodes.keySet().stream()
+                .filter(node -> node.getType() == NodeType.DUMMY).collect(Collectors.toList());
+
+        linkSourceToRegularNodes();
+        linkDummyNodesToSource();
+        linkRegularNodesToDummyNodes();
+        linkRegularNodesToRegularNodes();
+
+    }
+
     private void addSourceNode() {
         sourceNode = new Node();
         nodes.putIfAbsent(sourceNode, new HashMap<>());
@@ -48,6 +73,19 @@ public class ImprovementGraph {
 
     private void addNode(Facility facility, NodeType type) {
         nodes.putIfAbsent(new Node(facility, type), new HashMap<>());
+    }
+
+    private void addNode(Facility facility, NodeType type, Queue<Customer> tabuList) {
+        if (type == NodeType.REGULAR) {
+            Set<Customer> possibleCustomers = new HashSet<>(facility.getServedCustomers());
+            possibleCustomers.removeAll(tabuList);
+
+            if (!possibleCustomers.isEmpty()) {
+                nodes.putIfAbsent(new Node(facility, type, tabuList), new HashMap<>());
+            }
+        } else {
+            nodes.putIfAbsent(new Node(facility, type, tabuList), new HashMap<>());
+        }
     }
 
     private void addEdge(Node n1, Node n2, float value) {
@@ -126,7 +164,108 @@ public class ImprovementGraph {
     }
 
     public List<Node> getBestExchangeCycle() {
-        // Forward Search Implementation
+        // Forward Search Implementation that find the best cycle, even if it has a negative saving
+
+        List<Node> cycle = null;
+        List<Node> bestCycle = null;
+        float maxSaving = -Float.MAX_VALUE;
+
+        Queue<Node> Q = new LinkedList<>();
+        Q.add(sourceNode);
+
+        while (!Q.isEmpty()) {
+            Node i = Q.poll();
+
+            if (!isSubsetDisjointPathUntil(i)) {
+                //Console.println("NO");
+                //Console.println("Avoiding the extraction of node: " + i);
+                continue;
+            }
+            //Console.println("YES");
+            //Console.println("\nExtracting node: " + i);
+            for (Map.Entry<Node, Float> edge : getForwardStar(i)) {
+                Node h = edge.getKey();
+                float edgeCost = edge.getValue();
+
+                if (willBeSubsetDisjointPath(i, h)) { // source -> i -> h is a subset disjoint path
+                    //Console.println("YES");
+                    // Check Bellman's condition
+                    if (i.getDistanceFromSource() + edgeCost < h.getDistanceFromSource()) {
+                        switch (h.getType()) {
+                            case REGULAR: { // Better "distance" found for regular node h
+                                //Console.println("Better distance found for node " + h + " updating it.");
+                                h.setPredecessor(i);
+                                h.setDistanceFromSource(i.getDistanceFromSource() + edgeCost);
+                                Q.add(h);
+                                break;
+                            }
+                            case DUMMY: { // Node h is a dummmy node: path exchange found
+                                h.setPredecessor(i);
+                                sourceNode.setPredecessor(h);
+
+                                cycle = buildCycle(h);
+                                //Console.println("\t Path exchange found! " + cycle + " saving = " + -getCycleCost(cycle));
+                                break;
+                            }
+                        }
+                    } else {
+                        switch (h.getType()) {
+                            case REGULAR: { // Not better "distance" found for regular node h
+                                // Skip nothing to do
+                                break;
+                            }
+                            case DUMMY: { // Node h is a dummmy node: path exchange found
+                                h.setPredecessor(i);
+                                sourceNode.setPredecessor(h);
+
+                                cycle = buildCycle(h);
+                                //Console.println("\t Path exchange found! " + cycle + " saving = " + -getCycleCost(cycle));
+                                break;
+                            }
+                        }
+                    }
+                } else { // source -> i -> h is not a subset disjoint path
+                    //Console.println("NO");
+                    if (h.getType() == NodeType.REGULAR) { // Node h is a regular node: cycle exchange found
+                        // Check bellman's condition to see if it's an improving cycle
+                        if (i.getDistanceFromSource() + edgeCost < h.getDistanceFromSource()) {
+                            //Console.println("Better distance found for node " + h + " updating it.");
+                            h.setPredecessor(i);
+                            h.setDistanceFromSource(i.getDistanceFromSource() + edgeCost);
+                            Q.add(h);
+
+                            cycle = buildCycle(h);
+                            //Console.println("\t Profitable Cycle exchange found! " + cycle + " saving = " + -getCycleCost(cycle));
+                            break; // Avoid looking the remaining FS(i) since it will now loop forever
+                        } else {
+                            //Console.println("\t Not profitable Cycle exchange found!");
+                            h.setPredecessor(i);
+
+                            cycle = buildCycle(h);
+                            break; // Avoid looking the remaining FS(i) since it will now loop forever
+                        }
+                    }
+                }
+
+                if (cycle != null) {
+                    float saving = -getCycleCost(cycle);
+                    if (saving > maxSaving) {
+                        maxSaving = saving;
+                        bestCycle = cycle;
+                    }
+                    cycle = null;
+                    sourceNode.setPredecessor(null);
+                }
+            }
+        }
+
+        Console.println("\nQueue is empty. Best cycle found: " + bestCycle + " with saving of: " + maxSaving);
+
+        return bestCycle;
+    }
+
+    public List<Node> getBestImprovingExchangeCycle() {
+        // Forward Search Implementation that find only improving cycles, null is returned otherwise.
 
         List<Node> cycle = null;
         List<Node> bestCycle = null;
@@ -140,23 +279,23 @@ public class ImprovementGraph {
             Node i = Q.poll();
 
             if (!isSubsetDisjointPathUntil(i)) {
-                Console.println("NO");
-                Console.println("Avoiding the extraction of node: " + i);
+                //Console.println("NO");
+                //Console.println("Avoiding the extraction of node: " + i);
                 continue;
             }
-            Console.println("YES");
-            Console.println("\nExtracting node: " + i);
+            //Console.println("YES");
+            //Console.println("\nExtracting node: " + i);
             for (Map.Entry<Node, Float> edge : getForwardStar(i)) {
                 Node h = edge.getKey();
                 float edgeCost = edge.getValue();
 
                 if (willBeSubsetDisjointPath(i, h)) { // source -> i -> h is a subset disjoint path
-                    Console.println("YES");
+                    //Console.println("YES");
                     // Check Bellman's condition
                     if (i.getDistanceFromSource() + edgeCost < h.getDistanceFromSource()) {
                         switch (h.getType()) {
                             case REGULAR: { // Better "distance" found for regular node h
-                                Console.println("Better distance found for node " + h + " updating it.");
+                                //Console.println("Better distance found for node " + h + " updating it.");
                                 h.setPredecessor(i);
                                 h.setDistanceFromSource(i.getDistanceFromSource() + edgeCost);
                                 Q.add(h);
@@ -168,27 +307,27 @@ public class ImprovementGraph {
 
                                 cycleFound = true;
                                 cycle = buildCycle(h);
-                                Console.println("\t Path exchange found! " + cycle + " saving = " + -getCycleCost(cycle));
+                                //Console.println("\t Path exchange found! " + cycle + " saving = " + -getCycleCost(cycle));
                                 break;
                             }
                         }
                     }
                 } else { // source -> i -> h is not a subset disjoint path
-                    Console.println("NO");
+                    //Console.println("NO");
                     if (h.getType() == NodeType.REGULAR) { // Node h is a regular node: cycle exchange found
                         // Check bellman's condition to see if it's an improving cycle
                         if (i.getDistanceFromSource() + edgeCost < h.getDistanceFromSource()) {
-                            Console.println("Better distance found for node " + h + " updating it.");
+                            //Console.println("Better distance found for node " + h + " updating it.");
                             h.setPredecessor(i);
                             h.setDistanceFromSource(i.getDistanceFromSource() + edgeCost);
                             Q.add(h);
 
                             cycleFound = true;
                             cycle = buildCycle(h);
-                            Console.println("\t Profitable Cycle exchange found! " + cycle + " saving = " + -getCycleCost(cycle));
+                            //Console.println("\t Profitable Cycle exchange found! " + cycle + " saving = " + -getCycleCost(cycle));
                             break; // Avoid looking the remaining FS(i) since it will now loop forever
                         } else {
-                            Console.println("\t Not profitable Cycle exchange found!");
+                            //Console.println("\t Not profitable Cycle exchange found!");
                         }
                     }
                 }
@@ -215,14 +354,14 @@ public class ImprovementGraph {
 
     private boolean isSubsetDisjointPathUntil(Node lastNode) {
         Set<Facility> visitedFacilities = new HashSet<>();
-        System.out.print("Is a subset disjoint cycle? " + lastNode + " <- ");
+        //System.out.print("Is a subset disjoint cycle? " + lastNode + " <- ");
 
         return testDisjointness(lastNode, visitedFacilities);
     }
 
     private boolean willBeSubsetDisjointPath(Node lastNode, Node newNode) {
         Set<Facility> visitedFacilities = new HashSet<>();
-        System.out.print("Will be a subset disjoint cycle? " + newNode + " <- " + lastNode + " <- ");
+        //System.out.print("Will be a subset disjoint cycle? " + newNode + " <- " + lastNode + " <- ");
 
         return testDisjointness(lastNode, visitedFacilities) && !visitedFacilities.contains(newNode.getFacility());
     }
@@ -232,7 +371,7 @@ public class ImprovementGraph {
         Node next = lastNode.getPredecessor();
 
         while (next != null) {
-            System.out.print(next + " <- ");
+            //System.out.print(next + " <- ");
             Facility f = next.getFacility();
             if (visitedFacilities.contains(f)) return false;
             else visitedFacilities.add(f);

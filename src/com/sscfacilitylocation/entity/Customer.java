@@ -1,7 +1,7 @@
 package com.sscfacilitylocation.entity;
 
 
-public class Customer {
+public class Customer implements Cloneable {
 
     private int id;
     private float demand;
@@ -25,6 +25,18 @@ public class Customer {
 
     public void setDemand(float demand) {
         this.demand = demand;
+    }
+
+    @Override
+    public Object clone() {
+        try {
+            Customer customer = (Customer) super.clone();
+            customer.id = id;
+            customer.demand = demand;
+            return customer;
+        } catch (CloneNotSupportedException ex) {
+            throw new InternalError(ex);
+        }
     }
 
     public String toString() {

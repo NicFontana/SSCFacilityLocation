@@ -1,8 +1,6 @@
 package com.sscfacilitylocation.entity;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 public class Facility implements Cloneable {
 
@@ -75,10 +73,20 @@ public class Facility implements Cloneable {
     }
 
     public Customer getWorstCustomer() {
+        return getWorstCustomerIn(servedCustomers);
+    }
+
+    public Customer getWorstCustomer(Queue<Customer> tabuList) {
+        Set<Customer> possibleCustomers = new HashSet<>(servedCustomers);
+        possibleCustomers.removeAll(tabuList);
+        return getWorstCustomerIn(possibleCustomers);
+    }
+
+    private Customer getWorstCustomerIn(Set<Customer> possibleCustomers) {
         Customer worstCustomer = null;
         float worstCost = -1;
 
-        for (Customer c : servedCustomers) {
+        for (Customer c : possibleCustomers) {
             float customerCost = customerCosts.get(c.getId());
 
             if (customerCost > worstCost) {
@@ -93,6 +101,30 @@ public class Facility implements Cloneable {
         return worstCustomer;
     }
 
+    @Override
+    public Object clone() {
+        try {
+            Facility facility = (Facility) super.clone();
+            facility.id = id;
+            facility.fixedCost = fixedCost;
+            facility.customerCosts = new HashMap<>();
+            this.customerCosts.forEach((id, cost) -> {
+                facility.customerCosts.put(id, cost);
+            });
+            facility.servedCustomers = new HashSet<>();
+            this.servedCustomers.forEach(customer -> {
+                facility.servedCustomers.add((Customer) customer.clone());
+            });
+            facility.capacity = capacity;
+            facility.residualCapacity = residualCapacity;
+
+            return facility;
+        } catch (CloneNotSupportedException ex) {
+            throw new InternalError(ex);
+        }
+    }
+
+    @Override
     public String toString() {
         return String.valueOf(id);
     }

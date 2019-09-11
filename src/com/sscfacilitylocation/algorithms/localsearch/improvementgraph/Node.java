@@ -4,6 +4,7 @@ import com.sscfacilitylocation.entity.Customer;
 import com.sscfacilitylocation.entity.Facility;
 
 import java.util.Objects;
+import java.util.Queue;
 
 public class Node {
 
@@ -49,6 +50,34 @@ public class Node {
         distanceFromSource = 0.0F;
         leavingCustomer = null;
         name = "s";
+    }
+
+    Node(Facility facility, NodeType type, Queue<Customer> tabuList) {
+        switch (type) {
+            case REGULAR: {
+                this.facility = facility;
+                distanceFromSource = Float.MAX_VALUE;
+                leavingCustomer = facility.getWorstCustomer(tabuList);
+                name = String.valueOf(facility.getId());
+                break;
+            }
+            case DUMMY: {
+                this.facility = facility;
+                distanceFromSource = Float.MAX_VALUE;
+                leavingCustomer = facility.getWorstCustomer(tabuList);
+                name = 'd' + String.valueOf(facility.getId());
+                break;
+            }
+            case SOURCE: {
+                this.facility = null;
+                distanceFromSource = 0.0F;
+                leavingCustomer = null;
+                name = "s";
+                break;
+            }
+        }
+        predecessor = null;
+        this.type = type;
     }
 
     String getName() {
