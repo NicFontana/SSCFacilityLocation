@@ -1,5 +1,6 @@
 package com.sscfacilitylocation.algorithms.greedy;
 
+import com.sscfacilitylocation.common.Problem;
 import com.sscfacilitylocation.entity.Customer;
 import com.sscfacilitylocation.entity.Facility;
 
@@ -8,7 +9,11 @@ import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-public class LowerFacilityCostLowerCustomerCostGreedyStrategy implements GreedyStrategy {
+public class LowerFacilityCostLowerCustomerCostGreedy extends AbstractGreedy {
+
+    public LowerFacilityCostLowerCustomerCostGreedy(Problem problem) {
+        super(problem);
+    }
 
     @Override
     public Queue<Facility> getSortedFacilities(Collection<Facility> possibleFacilities) {

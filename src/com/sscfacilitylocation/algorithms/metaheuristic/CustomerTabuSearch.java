@@ -1,6 +1,6 @@
 package com.sscfacilitylocation.algorithms.metaheuristic;
 
-import com.sscfacilitylocation.algorithms.localsearch.SolutionImprovement;
+import com.sscfacilitylocation.algorithms.localsearch.improvementgraph.SolutionImprovement;
 import com.sscfacilitylocation.algorithms.localsearch.improvementgraph.ImprovementGraph;
 import com.sscfacilitylocation.algorithms.localsearch.improvementgraph.Node;
 import com.sscfacilitylocation.common.Solution;
@@ -15,7 +15,7 @@ import java.util.Queue;
 public class CustomerTabuSearch {
 
     private Solution bestSolution;
-    private Queue<Customer> tabuList;
+    Queue<Customer> tabuList;
     private int tabuListLength;
     private int numOfIterationWithoutImprovment;
     private int stopWithoutImprovementAfter;
@@ -45,6 +45,7 @@ public class CustomerTabuSearch {
             if (aspiration) {
                 aspirationSolution = (Solution) tempSolution.clone();
                 SolutionImprovement solutionImprovementWithAspiration = getSolutionImprovement(aspirationSolution, tabuList, aspiration);
+                Console.println("ASPIRATION");
                 if (updateSituation(aspirationSolution, solutionImprovementWithAspiration)) { // Aspiration take me to a new best solution
                     Console.println("Best solution reached with aspiration.");
                     tempSolution = aspirationSolution;
@@ -69,25 +70,12 @@ public class CustomerTabuSearch {
         return bestSolution;
     }
 
-    private SolutionImprovement getSolutionImprovement(Solution currentSolution, Queue<Customer> tabuList, boolean aspiration) {
-        ImprovementGraph improvementGraph;
-
-        if (aspiration) improvementGraph = new ImprovementGraph(currentSolution);
-        else improvementGraph = new ImprovementGraph(currentSolution, tabuList);
-
-        List<Node> cycle = improvementGraph.getBestExchangeCycle();
-
-        return new SolutionImprovement(cycle);
-    }
-
     private boolean updateSituation(Solution tempSolution, SolutionImprovement solutionImprovement) {
-        // Return true if it find a new best solution
-
         tempSolution.applyImprovement(solutionImprovement);
 
-        for (Customer c : solutionImprovement.getInvolvedCustomers()) {
-            if (!tabuList.contains(c)) { // If I'm in aspiration mode it could happen that tabuList contains c
-                tabuList.add(c);
+        for (Customer element : solutionImprovement.getInvolvedCustomers()) {
+            if (!tabuList.contains(element)) {
+                tabuList.add(element);
             }
         }
         while (tabuList.size() > tabuListLength) {
@@ -105,6 +93,18 @@ public class CustomerTabuSearch {
             Console.println(bestSolution);
             return true;
         }
+
         return false;
+    }
+
+    private SolutionImprovement getSolutionImprovement(Solution currentSolution, Queue<Customer> tabuList, boolean aspiration) {
+        ImprovementGraph improvementGraph;
+
+        if (aspiration) improvementGraph = new ImprovementGraph(currentSolution);
+        else improvementGraph = new ImprovementGraph(currentSolution, tabuList);
+
+        List<Node> cycle = improvementGraph.getBestExchangeCycle();
+
+        return new SolutionImprovement(cycle);
     }
 }

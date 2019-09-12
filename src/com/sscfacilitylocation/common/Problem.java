@@ -1,11 +1,8 @@
 package com.sscfacilitylocation.common;
 
-import com.sscfacilitylocation.algorithms.greedy.GreedyStrategy;
-import com.sscfacilitylocation.algorithms.localsearch.LocalSearchStrategy;
-import com.sscfacilitylocation.algorithms.localsearch.SolutionImprovement;
+import com.sscfacilitylocation.algorithms.greedy.AbstractGreedy;
+import com.sscfacilitylocation.algorithms.localsearch.AbstractLocalSearch;
 import com.sscfacilitylocation.algorithms.metaheuristic.CustomerTabuSearch;
-import com.sscfacilitylocation.entity.Customer;
-import com.sscfacilitylocation.entity.Facility;
 import com.sscfacilitylocation.utility.Console;
 
 import java.io.BufferedReader;
@@ -21,13 +18,9 @@ public class Problem {
     private float[] facilityFixedCosts;
     private float[] customerDemands;
     private float[][] facilityToCustomerCosts;
-    private GreedyStrategy greedyStrategy;
-    private LocalSearchStrategy localSearchStrategy;
     private Solution solution;
 
-    public Problem(String instancePath, GreedyStrategy greedyStrategy, LocalSearchStrategy localSearchStrategy) {
-        this.greedyStrategy = greedyStrategy;
-        this.localSearchStrategy = localSearchStrategy;
+    public Problem(String instancePath) {
 
         try {
             BufferedReader inFile = new BufferedReader(new FileReader(instancePath));
@@ -79,6 +72,10 @@ public class Problem {
         return numOfCustomers;
     }
 
+    public float[] getCustomerDemands() {
+        return customerDemands;
+    }
+
     public float[] getFacilityCapacities() {
         return facilityCapacities;
     }
@@ -95,72 +92,25 @@ public class Problem {
         return solution;
     }
 
-    public void solveWithGreedy() {
-        solution = new Solution(this);
-
-        HashSet<Customer> toBeAssignedCustomers = new HashSet<>();
-        for (int i=0; i < numOfCustomers; i++) {
-            toBeAssignedCustomers.add(new Customer(i, customerDemands[i]));
-        }
-        PriorityQueue<Facility> facilitiesQueue = (PriorityQueue<Facility>) greedyStrategy.getSortedFacilities(solution.getClosedFacilities().values());
-
-        while (!facilitiesQueue.isEmpty() && !toBeAssignedCustomers.isEmpty()) {
-            Facility bestFacility = greedyStrategy.bestFacility(facilitiesQueue);
-            if (!greedyStrategy.facilityInd(bestFacility, toBeAssignedCustomers)) {
-                continue;
-            }
-            Console.println("Opening facility " + bestFacility.getId() + " with service cost for all customers: " + bestFacility.getWholeServingCost());
-            solution.openFacility(bestFacility);
-
-            PriorityQueue<Customer> customersQueue = (PriorityQueue<Customer>) greedyStrategy.getSortedCustomers(bestFacility, toBeAssignedCustomers);
-            while (!customersQueue.isEmpty()) {
-                Customer bestCustomer = greedyStrategy.bestCustomer(customersQueue);
-
-                if (greedyStrategy.customerInd(bestFacility, bestCustomer)) {
-                    solution.addCustomerToFacility(bestCustomer, bestFacility);
-                    Console.println("Assigning customer " + bestCustomer.getId() + " to facility " + bestFacility.getId() + " - capacity left: " + bestFacility.getResidualCapacity());
-                    toBeAssignedCustomers.remove(bestCustomer);
-                }
-            }
-
-            Console.println("No more customers assignable to facility " + bestFacility.getId() + "\n");
-        }
-
-        if (!toBeAssignedCustomers.isEmpty()) {
-            solution = null;
-        }
+    public void solveWithGreedy(AbstractGreedy greedy) {
+        solution = greedy.run();
     }
 
-    public void performLocalSearch() throws RuntimeException {
-
+    public void performLocalSearch(AbstractLocalSearch localSearch) throws RuntimeException {
         if (solution == null) {
             throw new RuntimeException("Cannot perform a Local Search without an initial solution");
         }
 
-        int k = 1;
-        Console.println("\nITERATION " + k);
-        SolutionImprovement solutionImprovement = localSearchStrategy.getSolutionImprovement(solution);
-
-        while (solutionImprovement != null) {
-            solution.applyImprovement(solutionImprovement);
-            Console.println("");
-            Console.println(solution);
-            k += 1;
-            Console.println("\nITERATION " + k);
-            solutionImprovement = localSearchStrategy.getSolutionImprovement(solution);
-        }
-
+        solution = localSearch.run();
         Console.println("\nNo more improvement feasible.");
-
     }
 
     public void performTabuSearch(CustomerTabuSearch tabuSearch) throws RuntimeException {
         if (solution == null) {
-            throw new RuntimeException("Cannot perform a Local Search without an initial solution");
+            throw new RuntimeException("Cannot perform a Tabu Search without an initial solution");
         }
 
         solution = tabuSearch.run();
-
         Console.println("Best solution is \n" + solution);
     }
 

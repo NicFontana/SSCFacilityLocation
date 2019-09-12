@@ -1,7 +1,7 @@
 package com.sscfacilitylocation.common;
 
-import com.sscfacilitylocation.algorithms.localsearch.CustomersTransfer;
-import com.sscfacilitylocation.algorithms.localsearch.SolutionImprovement;
+import com.sscfacilitylocation.algorithms.localsearch.improvementgraph.CustomersTransfer;
+import com.sscfacilitylocation.algorithms.localsearch.improvementgraph.SolutionImprovement;
 import com.sscfacilitylocation.entity.Customer;
 import com.sscfacilitylocation.entity.Facility;
 import com.sscfacilitylocation.utility.Console;
@@ -38,13 +38,15 @@ public class Solution implements Cloneable {
     }
 
     public void openFacility(Facility facility) {
-        closedFacilities.remove(facility.getId());
-        openedFacilities.put(facility.getId(), facility);
+        Facility f = closedFacilities.get(facility.getId());
+        closedFacilities.remove(f.getId());
+        openedFacilities.put(f.getId(), f);
     }
 
     public void closeFacility(Facility facility) {
-        openedFacilities.remove(facility.getId());
-        closedFacilities.put(facility.getId(), facility);
+        Facility f = openedFacilities.get(facility.getId());
+        openedFacilities.remove(f.getId());
+        closedFacilities.put(f.getId(), f);
     }
 
     public void addCustomerToFacility(Customer customer, Facility facility) {
