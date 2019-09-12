@@ -45,8 +45,7 @@ public class CustomerTabuSearch {
             if (aspiration) {
                 aspirationSolution = (Solution) tempSolution.clone();
                 SolutionImprovement solutionImprovementWithAspiration = getSolutionImprovement(aspirationSolution, tabuList, aspiration);
-                updateSituation(aspirationSolution, solutionImprovementWithAspiration);
-                if (aspirationSolution.getCost() == bestSolution.getCost()) { // Aspiration take me to a new best solution
+                if (updateSituation(aspirationSolution, solutionImprovementWithAspiration)) { // Aspiration take me to a new best solution
                     Console.println("Best solution reached with aspiration.");
                     tempSolution = aspirationSolution;
                 } else {
@@ -81,10 +80,16 @@ public class CustomerTabuSearch {
         return new SolutionImprovement(cycle);
     }
 
-    private void updateSituation(Solution tempSolution, SolutionImprovement solutionImprovement) {
+    private boolean updateSituation(Solution tempSolution, SolutionImprovement solutionImprovement) {
+        // Return true if it find a new best solution
+
         tempSolution.applyImprovement(solutionImprovement);
 
-        tabuList.addAll(solutionImprovement.getInvolvedCustomers());
+        for (Customer c : solutionImprovement.getInvolvedCustomers()) {
+            if (!tabuList.contains(c)) { // If I'm in aspiration mode it could happen that tabuList contains c
+                tabuList.add(c);
+            }
+        }
         while (tabuList.size() > tabuListLength) {
             tabuList.poll();
         }
@@ -98,6 +103,8 @@ public class CustomerTabuSearch {
             aspiration = false;
             Console.println("\nNew best solution");
             Console.println(bestSolution);
+            return true;
         }
+        return false;
     }
 }
