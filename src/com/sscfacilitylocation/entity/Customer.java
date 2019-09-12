@@ -1,6 +1,8 @@
 package com.sscfacilitylocation.entity;
 
 
+import java.util.Objects;
+
 public class Customer implements Cloneable {
 
     private int id;
@@ -37,6 +39,20 @@ public class Customer implements Cloneable {
         } catch (CloneNotSupportedException ex) {
             throw new InternalError(ex);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Customer)) return false;
+        Customer customer = (Customer) o;
+        return id == customer.id &&
+                Float.compare(customer.demand, demand) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, demand);
     }
 
     public String toString() {

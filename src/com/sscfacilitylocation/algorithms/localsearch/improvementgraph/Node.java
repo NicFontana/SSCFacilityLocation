@@ -27,7 +27,7 @@ public class Node {
             case DUMMY: {
                 this.facility = facility;
                 distanceFromSource = Float.MAX_VALUE;
-                leavingCustomer = facility.getWorstCustomer();
+                leavingCustomer = null;
                 name = 'd' + String.valueOf(facility.getId());
                 break;
             }
@@ -64,7 +64,7 @@ public class Node {
             case DUMMY: {
                 this.facility = facility;
                 distanceFromSource = Float.MAX_VALUE;
-                leavingCustomer = facility.getWorstCustomer(tabuList);
+                leavingCustomer = null;
                 name = 'd' + String.valueOf(facility.getId());
                 break;
             }
