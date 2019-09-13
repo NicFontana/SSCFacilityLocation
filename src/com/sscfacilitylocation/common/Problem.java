@@ -1,8 +1,8 @@
 package com.sscfacilitylocation.common;
 
-import com.sscfacilitylocation.algorithms.greedy.AbstractGreedy;
-import com.sscfacilitylocation.algorithms.localsearch.AbstractLocalSearch;
-import com.sscfacilitylocation.algorithms.metaheuristic.CustomerTabuSearch;
+import com.sscfacilitylocation.algorithms.greedy.GreedyStrategy;
+import com.sscfacilitylocation.algorithms.localsearch.LocalSearchStrategy;
+import com.sscfacilitylocation.algorithms.metaheuristic.tabusearch.TabuSearchStrategy;
 import com.sscfacilitylocation.utility.Console;
 
 import java.io.BufferedReader;
@@ -19,9 +19,15 @@ public class Problem {
     private float[] customerDemands;
     private float[][] facilityToCustomerCosts;
     private float optimumValue;
+    private GreedyStrategy greedy;
+    private LocalSearchStrategy localSearch;
+    private TabuSearchStrategy tabuSearch;
     private Solution solution;
 
-    public Problem(String instancePath) {
+    public Problem(String instancePath, GreedyStrategy greedy, LocalSearchStrategy localSearch, TabuSearchStrategy tabuSearch) {
+        this.greedy = greedy;
+        this.localSearch = localSearch;
+        this.tabuSearch = tabuSearch;
 
         try {
             BufferedReader inFile = new BufferedReader(new FileReader(instancePath));
@@ -107,25 +113,34 @@ public class Problem {
         return solution;
     }
 
-    public void solveWithGreedy(AbstractGreedy greedy) {
-        solution = greedy.run();
+    public void solveWithGreedy() {
+        solution = greedy.run(this);
     }
 
-    public void performLocalSearch(AbstractLocalSearch localSearch) throws RuntimeException {
+    public void performLocalSearch() throws RuntimeException {
         if (solution == null) {
             throw new RuntimeException("Cannot perform a Local Search without an initial solution");
         }
 
-        solution = localSearch.run();
+        solution = localSearch.run(solution);
         Console.println("\nNo more improvement feasible.");
     }
 
-    public void performTabuSearch(CustomerTabuSearch tabuSearch) throws RuntimeException {
+    public void performTabuSearch() throws RuntimeException {
         if (solution == null) {
             throw new RuntimeException("Cannot perform a Tabu Search without an initial solution");
         }
 
-        solution = tabuSearch.run();
+        switch (tabuSearch.getTabuType()) {
+            case CUSTOMER: {
+                solution = tabuSearch.run(solution, numOfCustomers / 3, 2000);
+                break;
+            }
+            case FACILITY: {
+                solution = tabuSearch.run(solution, numOfFacilities / 4, 2000);
+                break;
+            }
+        }
         Console.println("Best solution is \n" + solution);
     }
 

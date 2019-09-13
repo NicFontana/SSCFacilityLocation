@@ -1,20 +1,18 @@
 package com.sscfacilitylocation.algorithms.localsearch;
 
+import com.sscfacilitylocation.algorithms.localsearch.improvementgraph.ImprovementGraph;
+import com.sscfacilitylocation.algorithms.localsearch.improvementgraph.Node;
 import com.sscfacilitylocation.algorithms.localsearch.improvementgraph.SolutionImprovement;
 import com.sscfacilitylocation.common.Solution;
 import com.sscfacilitylocation.utility.Console;
 
-public abstract class AbstractLocalSearch {
+import java.util.List;
 
-    private Solution bestSolution;
+public class SingleCustomerExchangeLocalSearchStrategy implements LocalSearchStrategy {
 
-    public AbstractLocalSearch(Solution initialSolution) {
-        bestSolution = initialSolution;
-    }
-
-    public abstract SolutionImprovement getSolutionImprovement(Solution currentSolution);
-
-    public Solution run() {
+    @Override
+    public Solution run(Solution initialSolution) {
+        Solution bestSolution = initialSolution;
         int k = 1;
         Console.println("\nITERATION " + k);
         SolutionImprovement solutionImprovement = getSolutionImprovement(bestSolution);
@@ -29,5 +27,14 @@ public abstract class AbstractLocalSearch {
         }
 
         return bestSolution;
+    }
+
+    private SolutionImprovement getSolutionImprovement(Solution currentSolution) {
+        ImprovementGraph improvementGraph = new ImprovementGraph(currentSolution);
+        List<Node> cycle = improvementGraph.getBestImprovingExchangeCycle();
+
+        if (cycle != null) return new SolutionImprovement(cycle);
+
+        return null;
     }
 }

@@ -164,7 +164,7 @@ public class Solution implements Cloneable {
 
         sb.append("\nTOTAL COST = ").append(getCost());
         sb.append("\nOPTIMUM VALUE = ").append(problem.getOptimumValue())
-                .append(" - RELATIVE ERROR = ").append(problem.getSolution().getRelativePercentageError()).append("%\n");
+                .append(" - RELATIVE ERROR = ").append(problem.getSolution().getRelativePercentageError()).append("%");
         return sb.toString();
     }
 }

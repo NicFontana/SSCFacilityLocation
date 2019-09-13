@@ -1,10 +1,8 @@
 package com.sscfacilitylocation;
 
-import com.sscfacilitylocation.algorithms.greedy.AbstractGreedy;
-import com.sscfacilitylocation.algorithms.greedy.LowerFacilityCostLowerCustomerCostGreedy;
-import com.sscfacilitylocation.algorithms.localsearch.AbstractLocalSearch;
-import com.sscfacilitylocation.algorithms.localsearch.BestImprovementLocalSearch;
-import com.sscfacilitylocation.algorithms.metaheuristic.CustomerTabuSearch;
+import com.sscfacilitylocation.algorithms.greedy.LowerCostFacilityAndCustomerGreedyStrategy;
+import com.sscfacilitylocation.algorithms.localsearch.SingleCustomerExchangeLocalSearchStrategy;
+import com.sscfacilitylocation.algorithms.metaheuristic.tabusearch.CustomerTabuSearch;
 import com.sscfacilitylocation.common.Problem;
 import com.sscfacilitylocation.common.Solution;
 import com.sscfacilitylocation.utility.Console;
@@ -15,35 +13,35 @@ public class Main {
 
     public static void main(String[] args) {
         final String INSTANCE_PATH = "problem_instances/OR-Library_Instances/cap61";
-        Problem problem = new Problem(INSTANCE_PATH);
+        Problem problem = new Problem(
+                INSTANCE_PATH,
+                new LowerCostFacilityAndCustomerGreedyStrategy(),
+                new SingleCustomerExchangeLocalSearchStrategy(),
+                new CustomerTabuSearch()
+                );
         Console.println(problem);
 
-        //BufferedReader userIn = new BufferedReader(new InputStreamReader(System.in));
         Scanner userIn = new Scanner(System.in);
-        System.out.print("Press enter to apply greedy algorithm...");
+        System.out.print("\nPress ENTER to apply the greedy algorithm...");
         userIn.nextLine();
-
         Console.println("Greedy solution: ");
-        AbstractGreedy greedy = new LowerFacilityCostLowerCustomerCostGreedy(problem);
-        problem.solveWithGreedy(greedy);
+        problem.solveWithGreedy();
 
         Solution solution = problem.getSolution();
 
         if (solution != null) {
             Console.println(solution);
 
-            System.out.print("Press enter to apply local search...");
+            System.out.print("\nPress ENTER to start the local search...");
             userIn.nextLine();
-            Console.println("\nApplying Local Search: ");
-            AbstractLocalSearch localSearch = new BestImprovementLocalSearch(solution);
-            problem.performLocalSearch(localSearch);
+            Console.println("\nComputing Local Search: ");
+            problem.performLocalSearch();
             Console.println(problem.getSolution());
 
-            System.out.print("Press enter to apply tabu search...");
+            System.out.print("\nPress ENTER to start the tabu search...");
             userIn.nextLine();
-            Console.println("\nApplying Tabu Search: ");
-            CustomerTabuSearch tabuSearch = new CustomerTabuSearch(problem.getSolution(), problem.getNumOfCustomers() / 3, 2000);
-            problem.performTabuSearch(tabuSearch);
+            Console.println("\nComputing Tabu Search: ");
+            problem.performTabuSearch();
             Console.println(problem.getSolution());
         } else {
             Console.println("Problem is unsatisfiable.");

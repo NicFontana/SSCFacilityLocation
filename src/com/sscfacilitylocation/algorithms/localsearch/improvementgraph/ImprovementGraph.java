@@ -1,5 +1,6 @@
 package com.sscfacilitylocation.algorithms.localsearch.improvementgraph;
 
+import com.sscfacilitylocation.algorithms.metaheuristic.tabusearch.TabuType;
 import com.sscfacilitylocation.common.Solution;
 import com.sscfacilitylocation.entity.Customer;
 import com.sscfacilitylocation.entity.Facility;
@@ -41,17 +42,36 @@ public class ImprovementGraph {
 
     }
 
-    public ImprovementGraph(Solution solution, Queue<Customer> tabuList) {
+    public ImprovementGraph(Solution solution, TabuType tabuType, Queue tabuList) {
         nodes = new HashMap<>();
 
         addSourceNode();
 
-        for (Facility f : solution.getOpenedFacilities().values()) {
-            addNode(f, NodeType.REGULAR, tabuList);
-            addNode(f, NodeType.DUMMY, tabuList);
-        }
-        for (Facility f : solution.getClosedFacilities().values()) {
-            addNode(f, NodeType.DUMMY, tabuList);
+        switch (tabuType) {
+            case CUSTOMER: {
+                for (Facility f : solution.getOpenedFacilities().values()) {
+                    addNode(f, NodeType.REGULAR, tabuList);
+                    addNode(f, NodeType.DUMMY, tabuList);
+                }
+                for (Facility f : solution.getClosedFacilities().values()) {
+                    addNode(f, NodeType.DUMMY, tabuList);
+                }
+                break;
+            }
+            case FACILITY: {
+                for (Facility f : solution.getOpenedFacilities().values()) {
+                    if (!tabuList.contains(f)) {
+                        addNode(f, NodeType.REGULAR);
+                        addNode(f, NodeType.DUMMY);
+                    }
+                }
+                for (Facility f : solution.getClosedFacilities().values()) {
+                    if (!tabuList.contains(f)) {
+                        addNode(f, NodeType.DUMMY);
+                    }
+                }
+                break;
+            }
         }
 
         regularNodes = nodes.keySet().stream()
@@ -93,7 +113,6 @@ public class ImprovementGraph {
     }
 
     private Set<Map.Entry<Node, Float>> getForwardStar(Node i) {
-        //Console.println("Forward Star of " + i +": " + nodes.get(i).keySet());
         return nodes.get(i).entrySet();
     }
 
@@ -259,7 +278,7 @@ public class ImprovementGraph {
             }
         }
 
-        Console.println("\nQueue is empty. Best cycle found: " + bestCycle + " with saving of: " + maxSaving);
+        Console.println("\nBest cycle found: " + bestCycle + " with saving of: " + maxSaving);
 
         return bestCycle;
     }
@@ -346,7 +365,7 @@ public class ImprovementGraph {
         }
 
         if (bestCycle != null) {
-            Console.println("\nQueue is empty. Best cycle found: " + bestCycle + " with saving of: " + maxSaving);
+            Console.println("\nBest cycle found: " + bestCycle + " with saving of: " + maxSaving);
         }
 
         return bestCycle;
@@ -354,14 +373,12 @@ public class ImprovementGraph {
 
     private boolean isSubsetDisjointPathUntil(Node lastNode) {
         Set<Facility> visitedFacilities = new HashSet<>();
-        //System.out.print("Is a subset disjoint cycle? " + lastNode + " <- ");
 
         return testDisjointness(lastNode, visitedFacilities);
     }
 
     private boolean willBeSubsetDisjointPath(Node lastNode, Node newNode) {
         Set<Facility> visitedFacilities = new HashSet<>();
-        //System.out.print("Will be a subset disjoint cycle? " + newNode + " <- " + lastNode + " <- ");
 
         return testDisjointness(lastNode, visitedFacilities) && !visitedFacilities.contains(newNode.getFacility());
     }
@@ -371,7 +388,6 @@ public class ImprovementGraph {
         Node next = lastNode.getPredecessor();
 
         while (next != null) {
-            //System.out.print(next + " <- ");
             Facility f = next.getFacility();
             if (visitedFacilities.contains(f)) return false;
             else visitedFacilities.add(f);

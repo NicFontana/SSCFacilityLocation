@@ -125,6 +125,21 @@ public class Facility implements Cloneable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Facility)) return false;
+        Facility facility = (Facility) o;
+        return id == facility.id &&
+                Float.compare(facility.fixedCost, fixedCost) == 0 &&
+                Float.compare(facility.capacity, capacity) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, fixedCost, capacity);
+    }
+
+    @Override
     public String toString() {
         return String.valueOf(id);
     }

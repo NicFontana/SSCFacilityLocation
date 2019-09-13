@@ -2,7 +2,6 @@ package com.sscfacilitylocation.algorithms.localsearch.improvementgraph;
 
 import com.sscfacilitylocation.entity.Customer;
 import com.sscfacilitylocation.entity.Facility;
-import com.sscfacilitylocation.utility.Console;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,7 +28,6 @@ public class SolutionImprovement {
 
                     CustomersTransfer customersTransfer = new CustomersTransfer(leavingCustomer, losingFacility, incomeFacility);
                     customersTransferList.add(customersTransfer);
-                    Console.println("Aggiungo trasferimento di " + leavingCustomer);
                 }
             }
         }
@@ -47,5 +45,16 @@ public class SolutionImprovement {
         }
 
         return involvedCustomers;
+    }
+
+    public Set<Facility> getInvolvedFacilities() {
+        Set<Facility> involvedFacilities = new HashSet<>();
+
+        for (CustomersTransfer transfer : customersTransferList) {
+            involvedFacilities.add(transfer.getFromFacility());
+            involvedFacilities.add(transfer.getToFacility());
+        }
+
+        return involvedFacilities;
     }
 }
