@@ -14,6 +14,7 @@ c_{11} c_{12} c_{13}  c_{1|I|}
 c_{21} c_{22} c_{23}  c_{2|I|}
    ...    ...    ...   ....
 c_{|J|1} c_{|J|2} c_{|J|3}  c_{|J||I|}
+OPT_VAL
 
 where:
 
@@ -22,4 +23,5 @@ where:
 s_j (j=1,...,|J|) is the capacity of facility j;
 f_j (j=1,...,|J|) is the fixed cost of opening facility j;
 d_i (i=1,...,|I|) is the demand of customer i;
-c_{ji} (j=1,...,|J|), (i=1,...,|I|) is the cost of allocating all the demand of customer i to facility j.
+c_{ji} (j=1,...,|J|), (i=1,...,|I|) is the cost of allocating all the demand of customer i to facility j;
+OPT_VAL is the optimum solution value.

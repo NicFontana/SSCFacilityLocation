@@ -45,23 +45,23 @@ public class Facility implements Cloneable {
     }
 
     public void addCustomers(Collection<Customer> newCustomers) {
-        servedCustomers.addAll(newCustomers);
-        newCustomers.forEach(customer -> residualCapacity -= customer.getDemand());
+        newCustomers.forEach(customer -> {
+            if (servedCustomers.add(customer)) residualCapacity -= customer.getDemand();
+        });
     }
 
     public void removeCustomers(Collection<Customer> oldCustomers) {
-        servedCustomers.removeAll(oldCustomers);
-        oldCustomers.forEach(customer -> residualCapacity += customer.getDemand());
+        oldCustomers.forEach(customer -> {
+            if (servedCustomers.remove(customer)) residualCapacity += customer.getDemand();
+        });
     }
 
     public void addCustomer(Customer newCustomer) {
-        servedCustomers.add(newCustomer);
-        residualCapacity -= newCustomer.getDemand();
+        if (servedCustomers.add(newCustomer)) residualCapacity -= newCustomer.getDemand();
     }
 
     public void removeCustomer(Customer oldCustomer) {
-        servedCustomers.remove(oldCustomer);
-        residualCapacity += oldCustomer.getDemand();
+        if (servedCustomers.remove(oldCustomer)) residualCapacity += oldCustomer.getDemand();
     }
 
     public float getResidualCapacity() {

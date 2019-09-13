@@ -10,10 +10,12 @@ import java.util.*;
 
 public class Solution implements Cloneable {
 
+    private Problem problem;
     private HashMap<Integer, Facility> openedFacilities;
     private HashMap<Integer, Facility> closedFacilities;
 
     public Solution(Problem problem) {
+        this.problem = problem;
         openedFacilities = new HashMap<>();
         closedFacilities = new HashMap<>(problem.getNumOfFacilities());
 
@@ -66,8 +68,9 @@ public class Solution implements Cloneable {
     }
 
     public void addCustomersToFacility(Set<Customer> customers, Facility facility) {
-        if (openedFacilities.containsKey(facility.getId())) {
-            facility.addCustomers(customers);
+        Facility f = openedFacilities.get(facility.getId());
+        if (f != null) {
+            f.addCustomers(customers);
         } else {
             openFacility(facility);
             facility.addCustomers(customers);
@@ -75,9 +78,10 @@ public class Solution implements Cloneable {
     }
 
     public void removeCustomersFromFacility(Set<Customer> customers, Facility facility) {
-        openedFacilities.get(facility.getId()).removeCustomers(customers);
-        if (facility.getServedCustomers().isEmpty()) {
-            closeFacility(facility);
+        Facility f = openedFacilities.get(facility.getId());
+        f.removeCustomers(customers);
+        if (f.getServedCustomers().isEmpty()) {
+            closeFacility(f);
         }
     }
 
@@ -100,6 +104,23 @@ public class Solution implements Cloneable {
             addCustomersToFacility(transfer.getMovingCustomers(), transfer.getToFacility());
             removeCustomersFromFacility(transfer.getMovingCustomers(), transfer.getFromFacility());
         }
+    }
+
+    public boolean isAcceptable() {
+        List<Customer> customerList = new ArrayList<>();
+        boolean capacityRespected = false;
+
+        for (Facility facility : openedFacilities.values()) {
+            customerList.addAll(facility.getServedCustomers());
+            if (facility.getResidualCapacity() < 0) capacityRespected = true;
+        }
+        return customerList.size() == problem.getNumOfCustomers() && capacityRespected;
+    }
+
+    public float getRelativePercentageError() {
+        if (problem.getOptimumValue() != 0)
+        return 100 * (getCost() - problem.getOptimumValue()) / problem.getOptimumValue();
+        else return 100;
     }
 
     @Override
@@ -141,7 +162,9 @@ public class Solution implements Cloneable {
             sb.append("\n");
         });
 
-        sb.append("TOTAL COST = ").append(getCost());
+        sb.append("\nTOTAL COST = ").append(getCost());
+        sb.append("\nOPTIMUM VALUE = ").append(problem.getOptimumValue())
+                .append(" - RELATIVE ERROR = ").append(problem.getSolution().getRelativePercentageError()).append("%\n");
         return sb.toString();
     }
 }

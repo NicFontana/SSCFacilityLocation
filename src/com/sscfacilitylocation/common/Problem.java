@@ -18,6 +18,7 @@ public class Problem {
     private float[] facilityFixedCosts;
     private float[] customerDemands;
     private float[][] facilityToCustomerCosts;
+    private float optimumValue;
     private Solution solution;
 
     public Problem(String instancePath) {
@@ -58,6 +59,16 @@ public class Problem {
                     facilityToCustomerCosts[j][i] = Float.parseFloat(tokenizer.nextToken());
                 }
             }
+
+            // Load optimum value if present
+            line = inFile.readLine();
+            if (line != null) {
+                tokenizer = new StringTokenizer(line);
+                optimumValue = Float.parseFloat(tokenizer.nextToken());
+            } else {
+                optimumValue = 0;
+            }
+
             inFile.close();
         } catch (IOException e) {
             Console.println("Cannot read the instance file: " + e.getMessage());
@@ -86,6 +97,10 @@ public class Problem {
 
     public float[][] getFacilityToCustomerCosts() {
         return facilityToCustomerCosts;
+    }
+
+    public float getOptimumValue() {
+        return optimumValue;
     }
 
     public Solution getSolution() {
