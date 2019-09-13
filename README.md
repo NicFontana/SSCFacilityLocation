@@ -2,7 +2,7 @@
 Given:
 * n potential sites where a facility that provide a service could be installed: J = {1, .., n}
 * the fixed cost of opening each facility j: F = {f1, .., fn}
-* the capacity of each facility j (i.e. the maximum amount of service that can be delivered by the facility). S = {s1, .., sn}
+* the capacity of each facility j (i.e. the maximum amount of service that can be delivered by the facility): S = {s1, .., sn}
 
 Given:
 * m customers: I = {1, .., m}
@@ -11,7 +11,7 @@ Given:
 
 By deciding which facility to open and, for each customer, who serves it, determine the minimum cost solution that satisfies all customers while respecting the capacities of the facilities in the hypothesis of each customer being served by a single facility.
 
-# Implemented Algorithms
+## Implemented Algorithms
 
 ### Greedy
 The greedy algorithm at each step opens the facility that can serve all the not served customers left at the minimum cost (even considering the fixed cost of opening).
