@@ -37,7 +37,7 @@ public abstract class BaseTabuSearch implements TabuSearchStrategy {
         Console.println(tempSolution);
         SolutionImprovement solutionImprovement = getSolutionImprovement(tempSolution, aspiration);
 
-        while (numOfIterationWithoutImprovement < stopWithoutImprovementAfter) {
+        while (numOfIterationWithoutImprovement < stopWithoutImprovementAfter && solutionImprovement != null) {
             if (aspiration) {
                 aspirationSolution = (Solution) tempSolution.clone();
                 SolutionImprovement solutionImprovementWithAspiration = getSolutionImprovement(aspirationSolution, aspiration);

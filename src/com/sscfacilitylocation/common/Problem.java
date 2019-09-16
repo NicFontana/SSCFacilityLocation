@@ -133,7 +133,7 @@ public class Problem {
 
         switch (tabuSearch.getTabuType()) {
             case CUSTOMER: {
-                solution = tabuSearch.run(solution, numOfCustomers / 3, 2000);
+                solution = tabuSearch.run(solution, numOfCustomers / 3, 5000);
                 break;
             }
             case FACILITY: {
@@ -141,7 +141,6 @@ public class Problem {
                 break;
             }
         }
-        Console.println("Best solution is \n" + solution);
     }
 
     @Override

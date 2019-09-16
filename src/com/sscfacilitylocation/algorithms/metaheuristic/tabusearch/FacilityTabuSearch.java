@@ -23,7 +23,9 @@ public class FacilityTabuSearch extends BaseTabuSearch {
 
         List<Node> cycle = improvementGraph.getBestExchangeCycle();
 
-        return new SolutionImprovement(cycle);
+        if (cycle != null) return new SolutionImprovement(cycle);
+
+        return null;
     }
 
     @Override

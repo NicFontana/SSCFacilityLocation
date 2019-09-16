@@ -209,38 +209,23 @@ public class ImprovementGraph {
                 if (willBeSubsetDisjointPath(i, h)) { // source -> i -> h is a subset disjoint path
                     //Console.println("YES");
                     // Check Bellman's condition
-                    if (i.getDistanceFromSource() + edgeCost < h.getDistanceFromSource()) {
-                        switch (h.getType()) {
-                            case REGULAR: { // Better "distance" found for regular node h
+                    switch (h.getType()) {
+                        case REGULAR: {
+                            if (i.getDistanceFromSource() + edgeCost < h.getDistanceFromSource()) {
                                 //Console.println("Better distance found for node " + h + " updating it.");
                                 h.setPredecessor(i);
                                 h.setDistanceFromSource(i.getDistanceFromSource() + edgeCost);
                                 Q.add(h);
-                                break;
                             }
-                            case DUMMY: { // Node h is a dummmy node: path exchange found
-                                h.setPredecessor(i);
-                                sourceNode.setPredecessor(h);
-
-                                cycle = buildCycle(h);
-                                //Console.println("\t Path exchange found! " + cycle + " saving = " + -getCycleCost(cycle));
-                                break;
-                            }
+                            break;
                         }
-                    } else {
-                        switch (h.getType()) {
-                            case REGULAR: { // Not better "distance" found for regular node h
-                                // Skip nothing to do
-                                break;
-                            }
-                            case DUMMY: { // Node h is a dummmy node: path exchange found
-                                h.setPredecessor(i);
-                                sourceNode.setPredecessor(h);
+                        case DUMMY: {
+                            h.setPredecessor(i);
+                            sourceNode.setPredecessor(h);
 
-                                cycle = buildCycle(h);
-                                //Console.println("\t Path exchange found! " + cycle + " saving = " + -getCycleCost(cycle));
-                                break;
-                            }
+                            cycle = buildCycle(h);
+                            //Console.println("\t Path exchange found! " + cycle + " saving = " + -getCycleCost(cycle));
+                            break;
                         }
                     }
                 } else { // source -> i -> h is not a subset disjoint path
@@ -277,8 +262,7 @@ public class ImprovementGraph {
                 }
             }
         }
-
-        Console.println("\nBest cycle found: " + bestCycle + " with saving of: " + maxSaving);
+        if (bestCycle != null) Console.println("\nBest cycle found: " + bestCycle + " with saving of: " + maxSaving);
 
         return bestCycle;
     }
@@ -364,9 +348,7 @@ public class ImprovementGraph {
             }
         }
 
-        if (bestCycle != null) {
-            Console.println("\nBest cycle found: " + bestCycle + " with saving of: " + maxSaving);
-        }
+        if (bestCycle != null) Console.println("\nBest cycle found: " + bestCycle + " with saving of: " + maxSaving);
 
         return bestCycle;
     }
